@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Linked List Merger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .linked-list {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .node {
+            padding: 10px 15px;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            background-color: #e8f1fd;
+            color: #4a90e2;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .merged-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .node:hover {
+            transform: scale(1.05);
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-left: 5px solid #4a90e2;
+            text-align: left;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: calc(50% - 22px);
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4a90e2;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #357ab8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Interactive Linked List Merger</h2>
+    <p>Enter values for the two linked lists separated by commas (e.g., 1,2,4):</p>
+    <input type="text" id="list1" placeholder="List 1 values">
+    <input type="text" id="list2" placeholder="List 2 values">
+    <button onclick="mergeLists()">Merge Lists</button>
+
+    <div class="list-container">
+        <div class="linked-list" id="list1Display"></div>
+        <div class="linked-list" id="list2Display"></div>
+    </div>
+
+    <h3>Merged List:</h3>
+    <div class="merged-list" id="mergedListDisplay"></div>
+
+    <div class="explanation" id="explanation">
+        <strong>Explanation:</strong>
+        <p>Click "Merge Lists" to see the detailed steps of merging two sorted linked lists.</p>
+    </div>
+</div>
+
+<script>
+    function parseInputValues(input) {
+        return input.split(',').map(val => parseInt(val.trim())).filter(val => !isNaN(val));
+    }
+
+    function createNode(value) {
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.innerText = value;
+        return node;
+    }
+
+    function displayList(container, values) {
+        container.innerHTML = '';
+        values.forEach(value => {
+            container.appendChild(createNode(value));
+        });
+    }
+
+    function setExplanation(text) {
+        const explanation = document.getElementById('explanation');
+        explanation.innerHTML = `<strong>Explanation:</strong><p>${text}</p>`;
+    }
+
+    function mergeLists() {
+        const list1Values = parseInputValues(document.getElementById('list1').value);
+        const list2Values = parseInputValues(document.getElementById('list2').value);
+
+        const list1Container = document.getElementById('list1Display');
+        const list2Container = document.getElementById('list2Display');
+        const mergedListContainer = document.getElementById('mergedListDisplay');
+
+        displayList(list1Container, list1Values);
+        displayList(list2Container, list2Values);
+        mergedListContainer.innerHTML = '';
+
+        let i = 0, j = 0;
+        const mergedValues = [];
+
+        // Step-by-step merging with explanations
+        function mergeStep() {
+            if (i < list1Values.length && j < list2Values.length) {
+                if (list1Values[i] < list2Values[j]) {
+                    mergedValues.push(list1Values[i]);
+                    setExplanation(`List1 value ${list1Values[i]} is less than List2 value ${list2Values[j]}, so ${list1Values[i]} is added to the merged list.`);
+                    i++;
+                } else {
+                    mergedValues.push(list2Values[j]);
+                    setExplanation(`List2 value ${list2Values[j]} is less than or equal to List1 value ${list1Values[i]}, so ${list2Values[j]} is added to the merged list.`);
+                    j++;
+                }
+                displayList(mergedListContainer, mergedValues);
+                setTimeout(mergeStep, 1000); // Continue merging step-by-step every second
+            } else if (i < list1Values.length) {
+                mergedValues.push(list1Values[i]);
+                setExplanation(`List1 still has remaining values. Adding ${list1Values[i]} to the merged list.`);
+                i++;
+                displayList(mergedListContainer, mergedValues);
+                setTimeout(mergeStep, 1000);
+            } else if (j < list2Values.length) {
+                mergedValues.push(list2Values[j]);
+                setExplanation(`List2 still has remaining values. Adding ${list2Values[j]} to the merged list.`);
+                j++;
+                displayList(mergedListContainer, mergedValues);
+                setTimeout(mergeStep, 1000);
+            } else {
+                setExplanation(`Merging complete! Final merged list: [${mergedValues.join(', ')}].`);
+            }
+        }
+
+        setExplanation('Starting the merging process...');
+        mergeStep();
+    }
+</script>
+
+</body>
+</html>
+
